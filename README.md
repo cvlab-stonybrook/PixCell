@@ -197,12 +197,43 @@ Follow the instructions on those pages to sample using the `diffusers` API.
 
 ## 🎨 Virtual Staining
 
+### Inference
+
 We provide the implementation of our virtual staining algorithm in a Jupyter notebook [`virtual_staining.ipynb`](virtual_staining/virtual_staining.ipynb).
 
 The virtual staining relies on additional model weights (PixCell-1024 LoRA, flow-matching MLP).
 For the four stains of the [MIST dataset](https://github.com/lifangda01/AdaptiveSupervisedPatchNCE) (HER2, ER, PR, Ki67) and the [HER2Match dataset](https://zenodo.org/records/15797050), the notebook downloads the necessary models from our [Huggingface repository](https://huggingface.co/StonyBrook-CVLab/pixcell-virtual-staining).
 
-We will be releasing the code to train your own LoRA and flow-matching MLP (soon).
+### Training
+
+We provide scripts for training the PixCell-1024 IHC LoRA and the flow-matching MLP.
+
+For LoRA training, you can run the script using `accelerate`:
+
+    CUDA_VISIBLE_DEVICES=1 accelerate launch --num_processes N \
+        virtual_staining/train_lora.py \
+        --dataset [MIST/HER2Match] \
+        --root_dir /path/to/data/ \
+        --split train \
+        --stain [HER2/PR/ER/Ki67/ ] \
+        --train_batch_size 4 \
+        --num_epochs 10 \
+        --gradient_accumulation_steps 2
+
+For the MLP training, you can run it as:
+    
+    python virutal_staining/train_flow_mlp.py \
+        --dataset [MIST/HER2Match] \
+        --root_dir /path/to/data/ \
+        --split train \
+        --stain [HER2/PR/ER/Ki67/ ] \
+        --device cuda \
+        --train_batch_size 4 \
+        --num_epochs 100 \
+        --save_every 25 \
+
+To speed up training for both the LoRA and MLP, we suggest pre-extracting the UNI embeddings for the images in the dataset. 
+The scripts we provide assume that the UNI embeddings are **not** pre-extracted.
 
 ---
 
