@@ -18,6 +18,7 @@ We present PixCell, the first generative foundation model for digital histopatho
 
 ## 🔥 News
 
+- **Nov 2025**: Released the virtual staining models + code.
 - **Sep 2025**: Released training + sampling code for PixCell.  
 - **June 2025**: Released Hugging Face Diffusers checkpoints for PixCell:
   - [PixCell-256 (Diffusers)](https://huggingface.co/StonyBrook-CVLab/PixCell-256)
@@ -31,8 +32,8 @@ We present PixCell, the first generative foundation model for digital histopatho
 - [🔧 Dependencies and Installation](#-dependencies-and-installation)
 - [📂 Dataset Preparation](#-dataset-preparation)
 - [🚀 Training](#-training)
-- [🎨 Sampling](#-sampling)
-- [Virtual Staining: coming soon] 
+- [🔬 Sampling](#-sampling)
+- [🎨 Virtual Staining](#-virtual-staining)
 - [📦 Model Zoo](#-model-zoo)
 - [📄 Citation](#-citation)
 
@@ -151,7 +152,7 @@ Each stage reuses the weights of the previous resolution, allowing faster conver
 See the config files in `configs/pan_cancer/` for details.
 
 
-## 🎨 Sampling
+## 🔬 Sampling
 
 We provide sampling scripts for generating 256×256 (PixCell-256) and 1024×1024 (PixCell-1024) patches.
 
@@ -191,6 +192,17 @@ We also provide **Diffusers-compatible checkpoints** and sampling code on Huggin
 - [PixCell-1024 (Diffusers)](https://huggingface.co/StonyBrook-CVLab/PixCell-1024)  
 
 Follow the instructions on those pages to sample using the `diffusers` API.
+
+---
+
+## 🎨 Virtual Staining
+
+We provide the implementation of our virtual staining algorithm in a Jupyter notebook [`virtual_staining.ipynb`](virtual_staining/virtual_staining.ipynb).
+
+The virtual staining relies on additional model weights (PixCell-1024 LoRA, flow-matching MLP).
+For the four stains of the [MIST dataset](https://github.com/lifangda01/AdaptiveSupervisedPatchNCE) (HER2, ER, PR, Ki67) and the [HER2Match dataset](https://zenodo.org/records/15797050), the notebook downloads the necessary models from our [Huggingface repository](https://huggingface.co/StonyBrook-CVLab/pixcell-virtual-staining).
+
+We will be releasing the code to train your own LoRA and flow-matching MLP (soon).
 
 ---
 
