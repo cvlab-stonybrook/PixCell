@@ -13,8 +13,7 @@
 We present PixCell, the first generative foundation model for digital histopathology. We progressively train our model to generate from 256x256 to 1024x1024 pixel images conditioned on [UNI2-h](https://huggingface.co/MahmoodLab/UNI2-h) embeddings. PixCell achieves state-of-the-art quality in digital pathology image generation and can be seamlessly used to perform targeted data augmentation and generative downstream tasks.
 
 
-<img src="./asset/overview.png" alt="PixCell samples" width="600" style="display: block; margin: 0 auto">
-
+<img src="./asset/overview.png" alt="PixCell samples" style="display: block; margin: 0 auto">
 
 ## 🔥 News
 
