@@ -164,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--root",
         type=str,
-        default="/lus/grand/projects/GeomicVar/srikar/pan_cancer",
+        required=True,
     )
     parser.add_argument("--checkpoint_dir", type=str, default='./feature_extraction_checkpoints')
     parser.add_argument("--dataset_name", type=str, required=True, choices=ds_lengths.keys())

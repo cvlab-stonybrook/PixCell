@@ -73,9 +73,7 @@ def sample_images(args):
         return out_img.transpose([0, 2, 3, 1])
 
 
-    workdir = Path(
-        "/home/srikarym/grand_data/pan_cancer/checkpoints/pixart_20x_1024_sd3_vae_pos_embed/"
-    )
+    workdir = Path(args.workdir)
     model, vae, config = build_model_new(workdir, device, "checkpoints/last_ema.ckpt")
 
     vae_scale = vae.config.scaling_factor
@@ -99,7 +97,7 @@ def sample_images(args):
     }
 
     uni_model = timm.create_model(pretrained=False, **timm_kwargs).to(device).eval()
-    local_path = "/lus/grand/projects/GeomicVar/srikar/pan_cancer/pretrained_models/uni2/pytorch_model.bin"
+    local_path = "/path/to/uni2/pytorch_model.bin"
     uni_model.load_state_dict(
         torch.load(local_path, map_location="cpu"),
         strict=True,
@@ -114,7 +112,7 @@ def sample_images(args):
     )
 
     image_list = np.load(
-        "/home/srikarym/grand_data/data/patches/brca/single_4096/image_list.npy"
+        "/path/to/image_list.npy"
     )
 
     idx_choice = np.random.randint(0, len(image_list), args.num_samples)
@@ -269,6 +267,7 @@ if __name__ == "__main__":
         default=0,
         help="GPU ID to use for sampling",
     )
+    parser.add_argument("--workdir", type=str, required=True)
 
     args = parser.parse_args()
     sample_images(args)

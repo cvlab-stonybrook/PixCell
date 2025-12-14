@@ -146,7 +146,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data_root",
         type=str,
-        default="/lus/grand/projects/GeomicVar/srikar/pan_cancer",
+        required=True,
     )
     parser.add_argument("--out_dir", type=str, required=True)
     parser.add_argument("--n_images", type=int, default=10000)

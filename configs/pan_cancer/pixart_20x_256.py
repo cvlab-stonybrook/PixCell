@@ -2,7 +2,7 @@ _base_ = ['../PixArt_xl2_internal.py']
 
 image_size = 256
 
-root = f"/lus/grand/projects/GeomicVar/srikar/pan_cancer"
+root = "/path/to/dataset"
 
 data = dict(
     type="PanCancerDataLowRes",
