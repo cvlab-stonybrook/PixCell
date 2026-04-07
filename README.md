@@ -32,7 +32,7 @@ We present PixCell, the first generative foundation model for digital histopatho
 - [📂 Dataset Preparation](#-dataset-preparation)
 - [🚀 Training](#-training)
 - [🔬 Sampling](#-sampling)
-- [🎛️ ControlNet](#-controlnet)
+- [🎛️ ControlNet](#-controlnet-training)
 - [🎨 Virtual Staining](#-virtual-staining)
 - [📦 Model Zoo](#-model-zoo)
 - [📄 Citation](#-citation)
@@ -189,7 +189,7 @@ We also provide **Diffusers-compatible checkpoints** and sampling code on Huggin
 Follow the instructions on those pages to sample using the `diffusers` API.
 
 
-## 🎛️ ControlNet
+## 🎛️ ControlNet Training
 
 We provide a mock implementation of our ControlNet training pipeline in [`controlnet/train.py`](controlnet/train.py).
 
