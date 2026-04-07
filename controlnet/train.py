@@ -120,6 +120,7 @@ def main():
 
             # Encode image
             img = 2*(img-0.5)
+            mask_img = 2*(mask_img-0.5)
             with torch.no_grad():
                 img_latents = vae.encode(img.to(base_transformer.device)).latent_dist.mean
                 img_latents = (img_latents-config.vae_shift)*config.vae_scale
