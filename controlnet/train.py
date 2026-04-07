@@ -128,7 +128,7 @@ def main():
                 mask_img_latents = vae.encode(mask_img.to(base_transformer.device)).latent_dist.mean
                 mask_img_latents = (mask_img_latents-config.vae_shift)*config.vae_scale
 
-            # Add noise to IHC latents
+            # Add noise to latents
             t = torch.randint(0, 1000, (bs,), device='cpu', dtype=torch.int64)
             atbar = noise_scheduler.alphas_cumprod[t].view(-1,1,1,1).to(base_transformer.device)
             epsilon = torch.randn_like(img_latents)
