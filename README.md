@@ -27,7 +27,7 @@ We present PixCell, the first generative foundation model for digital histopatho
 
 ## Contents
 
-- [📜 Overview](#-overview)
+- [📜 Overview](##pixcell-a-pan-cancer-diffusion-foundation-model)
 - [🔧 Dependencies and Installation](#-dependencies-and-installation)
 - [📂 Dataset Preparation](#-dataset-preparation)
 - [🚀 Training](#-training)
