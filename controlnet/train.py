@@ -98,15 +98,15 @@ def main():
     vae = pipeline.vae
     noise_scheduler = pipeline.scheduler
 
-    optimizer = torch.optim.AdamW(list(controlnet_transformer.parameters()) + list(uni_mlp.parameters()), lr=config.learning_rate)
+    optimizer = torch.optim.AdamW(controlnet_transformer.parameters(), lr=config.learning_rate)
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer=optimizer,
         num_warmup_steps=config.lr_warmup_steps,
         num_training_steps=(len(train_dataloader) * config.num_epochs),
     )
 
-    base_transformer, controlnet_transformer, uni_mlp, vae, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        base_transformer, controlnet_transformer, uni_mlp, vae, optimizer, train_dataloader, lr_scheduler
+    base_transformer, controlnet_transformer, vae, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+        base_transformer, controlnet_transformer, vae, optimizer, train_dataloader, lr_scheduler
     )
 
     global_step = 0
@@ -134,34 +134,31 @@ def main():
             epsilon = torch.randn_like(img_latents)
             noisy_latents = torch.sqrt(atbar)*img_latents + torch.sqrt(1-atbar)*epsilon
 
-            with accelerator.accumulate(controlnet_transformer), accelerator.accumulate(uni_mlp):
+            with accelerator.accumulate(controlnet_transformer):
                 current_timestep = t.clone().to(base_transformer.device)
 
-                # Transform H&E UNI to IHC
-                pred_uni_ihc = uni_mlp(uni_he.to(base_transformer.device))
-
-                # Pass H&E through ControlNet
+                # Pass mask through ControlNet
                 controlnet_outputs = controlnet_transformer(
                     hidden_states=noisy_latents,
                     conditioning=mask_img_latents,
-                    encoder_hidden_states=pred_uni_ihc,
+                    encoder_hidden_states=uni_he,
                     timestep=current_timestep,
                     return_dict=False,
                 )[0]
 
-                # Pass noisy IHC through denoiser
+                # Pass noisy H&E through denoiser
                 epsilon_pred = base_transformer(
                     noisy_latents,
-                    encoder_hidden_states=pred_uni_ihc,
+                    encoder_hidden_states=uni_he,
                     timestep=current_timestep,
                     controlnet_outputs=controlnet_outputs,
                     return_dict=False,
-                )[0]
+                )[0][:,:16,:,:] # We only train with epsilon
 
-                loss = ((epsilon_pred[:,:16,:,:] - epsilon)**2).mean()
+                loss = ((epsilon_pred - epsilon)**2).mean() 
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
-                    accelerator.clip_grad_norm_(list(controlnet_transformer.parameters()) + list(uni_mlp.parameters()), 1.0)
+                    accelerator.clip_grad_norm_(controlnet_transformer.parameters(), 1.0)
 
                 optimizer.step()
                 lr_scheduler.step()
