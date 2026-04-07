@@ -32,6 +32,7 @@ We present PixCell, the first generative foundation model for digital histopatho
 - [📂 Dataset Preparation](#-dataset-preparation)
 - [🚀 Training](#-training)
 - [🔬 Sampling](#-sampling)
+- [🎛️ ControlNet](#-controlnet)
 - [🎨 Virtual Staining](#-virtual-staining)
 - [📦 Model Zoo](#-model-zoo)
 - [📄 Citation](#-citation)
@@ -191,6 +192,15 @@ We also provide **Diffusers-compatible checkpoints** and sampling code on Huggin
 - [PixCell-1024 (Diffusers)](https://huggingface.co/StonyBrook-CVLab/PixCell-1024)  
 
 Follow the instructions on those pages to sample using the `diffusers` API.
+
+---
+
+## 🎛️ ControlNet
+
+We provide a mock implementation of our ControlNet training pipeline in [`controlnet/train.py`](controlnet/train.py).
+
+You will need to replace the dataloader with your own image condition dataset.
+Note that the ControlNet transformer also requires a UNI-2h embedding as conditioning in our implementation. It may also be possible to train without any conditioning.
 
 ---
 
