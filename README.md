@@ -50,7 +50,6 @@ git clone https://github.com/<your-username>/pixcell.git
 cd pixcell
 pip install -r requirements.txt
 ```
----
 
 ## 📂 Dataset Preparation
 
@@ -111,8 +110,6 @@ Extract features with:
 
     python tools/extract_features.py --dataset_name tcga_diagnostic --size 256
 
----
-
 ## 🚀 Training
 
 1. Select a config file in `configs/` (examples in `configs/pan_cancer/`).  
@@ -132,7 +129,6 @@ Options:
 ```
     accelerate config
 ```
----
 
 ## 🔄 Progressive Training
 
@@ -150,7 +146,6 @@ PixCell is trained in a **progressive fashion** to improve stability and efficie
 Each stage reuses the weights of the previous resolution, allowing faster convergence.  
 
 See the config files in `configs/pan_cancer/` for details.
-
 
 ## 🔬 Sampling
 
@@ -193,7 +188,6 @@ We also provide **Diffusers-compatible checkpoints** and sampling code on Huggin
 
 Follow the instructions on those pages to sample using the `diffusers` API.
 
----
 
 ## 🎛️ ControlNet
 
@@ -201,8 +195,6 @@ We provide a mock implementation of our ControlNet training pipeline in [`contro
 
 You will need to replace the dataloader with your own image condition dataset.
 Note that the ControlNet transformer also requires a UNI-2h embedding as conditioning in our implementation. It may also be possible to train without any conditioning.
-
----
 
 ## 🎨 Virtual Staining
 
@@ -243,8 +235,6 @@ For the MLP training, you can run it as:
 
 To speed up training for both the LoRA and MLP, we suggest pre-extracting the UNI embeddings for the images in the dataset. 
 The scripts we provide assume that the UNI embeddings are **not** pre-extracted.
-
----
 
 ## 📦 Model Zoo
 
