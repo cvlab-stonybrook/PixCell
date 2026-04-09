@@ -1,0 +1,57 @@
+# docker/docker-compose.yml
+# DSA stack for PixCell virtual staining project
+# Port 8081 to avoid conflict with WSInfer DSA on 8080
+# Adapted from https://github.com/DigitalSlideArchive/digital_slide_archive/tree/master/devops/dsa
+---
+services:
+  girder:
+    image: dsarchive/dsa_common
+    privileged: true
+    environment:
+      DSA_USER: "${DSA_USER}"
+    restart: unless-stopped
+    ports:
+      - "${DSA_PORT:-8081}:8080"
+    command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
+    volumes:
+      - ./assetstore:/assetstore
+      - ./logs:/logs
+      - ./db:/db
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      mongodb:
+        condition: service_started
+      memcached:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mongodb:
+    image: "mongo:6"
+    command: --maxConns 1000
+    volumes:
+      - ./db:/data/db
+
+  memcached:
+    image: "memcached:1.6"
+    command: -m 4096 --max-item-size 8M
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+
+  worker:
+    image: dsarchive/dsa_common
+    environment:
+      DSA_USER: "${DSA_USER}"
+      DSA_WORKER_CONCURRENCY: "${DSA_WORKER_CONCURRENCY:-2}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - rabbitmq
+    command: /opt/digital_slide_archive/devops/dsa/start_worker.sh

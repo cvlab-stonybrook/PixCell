@@ -1,0 +1,5 @@
+# docker/docker-compose.override.yml
+services:
+  girder:
+    volumes:
+      - ../data/slides:/mnt/slides:ro

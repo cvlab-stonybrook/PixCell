@@ -1,0 +1,20 @@
+# docker/provision.yaml — DSA provisioning config
+# See https://github.com/DigitalSlideArchive/digital_slide_archive/blob/master/devops/dsa/provision.yaml
+---
+# Admin user created on first boot
+admin:
+  login: admin
+  password: password
+  email: admin@example.com
+  firstName: Admin
+  lastName: Admin
+
+# Use filesystem assetstore (default)
+assetstore:
+  method: filesystem
+  root: /assetstore
+
+# Enable large_image settings for WSI support
+large_image:
+  cache:
+    memcached: memcached
