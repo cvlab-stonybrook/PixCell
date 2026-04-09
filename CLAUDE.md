@@ -1,4 +1,4 @@
-# PixCell: Virtual Staining & Histopathology Image Generation
+# PixCell & ZoomLDM: Virtual Staining & Histopathology Image Generation
 
 ## Virtual Staining — Conceptual Framework
 
@@ -42,6 +42,11 @@ H&E → TIL probability map experiment that established this boundary.
 
 ### Landscape
 
+**Our models**:
+- **PixCell** (arXiv 2506.05127): Pan-cancer diffusion foundation model, virtual staining
+- **ZoomLDM** (CVPR 2025): Multi-scale generation, super-resolution, large-image synthesis
+
+**External reference points**:
 - **GigaTIME** (Microsoft, Cell 2025): H&E → 21-channel virtual multiplex IF,
   14,256 patients, 24 cancer types. The current competitive benchmark for
   virtual multiplexing at scale.
@@ -66,6 +71,15 @@ images conditioned on UNI2-h embeddings, enabling:
 The model is trained progressively (256→512→1024) on ~70,000 WSIs from TCGA,
 CPTAC, GTEx, and other sources.
 
+**ZoomLDM** (CVPR 2025, same group) extends this to multi-scale generation.
+It synthesizes coherent histopathology images across different magnification
+levels using a magnification-aware conditioning mechanism with SSL embeddings.
+Key capabilities:
+- **Multi-scale generation**: Coherent patches at any zoom level with shared weights
+- **Large-image synthesis**: Up to 4096×4096 via joint multi-scale sampling (8 min/image)
+- **Super-resolution**: 4x enhancement via condition inversion with multi-scale enforcement
+- **Data-scarce thumbnails**: Weight sharing across scales boosts quality where training data is limited
+
 **Current virtual staining support**: Four IHC stains from the MIST dataset
 (HER2, ER, PR, Ki67) plus HER2Match, with pre-trained LoRA + flow MLP weights
 on HuggingFace. New stains can be trained with paired H&E/target data using
@@ -74,6 +88,7 @@ the existing pipeline.
 ## Key Repositories
 
 - **PixCell**: This repo — diffusion model, training, sampling, virtual staining
+- **ZoomLDM**: https://github.com/cvlab-stonybrook/ZoomLDM — multi-scale generation, super-resolution (CVPR 2025, arXiv 2411.16969)
 - **HuggingFace models**:
   - [PixCell-256](https://huggingface.co/StonyBrook-CVLab/PixCell-256) — Diffusers checkpoint
   - [PixCell-1024](https://huggingface.co/StonyBrook-CVLab/PixCell-1024) — Diffusers checkpoint
@@ -87,7 +102,7 @@ the existing pipeline.
 
 ## Tech Stack
 
-- **Diffusion model**: DiT/PixArt-Sigma architecture (28-layer transformer, 16 attention heads, cross-attention dim 1152)
+- **Diffusion models**: PixCell (DiT/PixArt-Sigma, 28-layer transformer, 16 heads, cross-attn dim 1152) + ZoomLDM (magnification-aware conditioning, shared weights across scales)
 - **VAE**: Stable Diffusion 3.5 VAE (16 latent channels)
 - **Foundation model**: UNI2-h (ViT-Giant, 1536-dim CLS token, encoded as 16 caption tokens per tile)
 - **Virtual staining**: LoRA (PEFT, targets `attn2` cross-attention, 8 projection matrices) + flow-matching MLP (ResMLP)
@@ -141,6 +156,7 @@ the existing pipeline.
 | PixCell-1024 | 1024×1024 | [HF Diffusers](https://huggingface.co/StonyBrook-CVLab/PixCell-1024) / [Original](https://huggingface.co/StonyBrook-CVLab/PixCell-original-weights) | High-res generation model |
 | Virtual staining (MIST) | 1024×1024 | [HF](https://huggingface.co/StonyBrook-CVLab/pixcell-virtual-staining) | LoRA + MLP for HER2, ER, PR, Ki67 |
 | Virtual staining (HER2Match) | 1024×1024 | [HF](https://huggingface.co/StonyBrook-CVLab/pixcell-virtual-staining) | LoRA + MLP for HER2 |
+| ZoomLDM | Multi-scale | [HF](https://huggingface.co/StonyBrook-CVLab) (auto-downloaded) | Multi-scale generation + super-resolution |
 
 ## Commands
 
