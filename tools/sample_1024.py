@@ -1,14 +1,18 @@
 import sys
-sys.path.insert(0, "/home/srikarym/code/PixArt-sigma")
+from pathlib import Path
+
+# Make the repo root importable so `diffusion` and `tools` resolve when this
+# script is run directly (e.g. `python tools/sample_1024.py ...`).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from uuid import uuid4
 from PIL import Image
 import numpy as np
 import torch
-from pathlib import Path
 from diffusers.models import AutoencoderKL
 from diffusion import DPMS
 from diffusion.utils.misc import read_config
-from diffusion.data.datasets.pan_cancer import PanCancerSingleType
+from diffusion.data.datasets.pan_cancer import PanCancerData
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 import shutil
@@ -19,8 +23,6 @@ def main(args):
 
     device = torch.device("cuda:0")
     batch_size = args.batch_size
-    size = args.size
-
 
     root = Path(args.workdir)
     model, vae, config = build_model_new(root, device, args.checkpoint)
@@ -28,8 +30,9 @@ def main(args):
     size = config.image_size
     latent_size = size // 8
 
-    data_kwargs = {**config.data, 'transform': None, 'subtype': args.subtype, 'data_source': args.data_source}
-    ds = PanCancerSingleType(**data_kwargs)
+    # Use UNI embeddings from the dataset (full 1024 patches) to condition generation.
+    data_kwargs = {**config.data, 'transform': None}
+    ds = PanCancerData(**data_kwargs)
 
 
     vae_scale = vae.config.scaling_factor
@@ -116,16 +119,7 @@ if __name__ == "__main__":
     parser.add_argument("--guidance_strength", type=float, default=2)
     parser.add_argument("--workdir", type=str, required=True)
     parser.add_argument("--checkpoint", type=str, required=True)
-    parser.add_argument("--data_source", type=str, default="tcga_diagnostic_1024")
-    parser.add_argument("--subtype", type=str, default="brca")
-    parser.add_argument("--size", type=int, default=1024)
     parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument(
-        "--fid_stats_root",
-        type=str,
-        required=True,
-    )
-
     parser.add_argument("--delete_outdir", action="store_true")
 
     args = parser.parse_args()

@@ -1,6 +1,10 @@
 import sys
-sys.path.insert(0, "/home/srikarym/code/PixArt-sigma")
 from pathlib import Path
+
+# Make the repo root importable so `diffusion` and `tools` resolve when this
+# script is run directly (e.g. `python tools/sample_4k.py ...`).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import warnings
 warnings.filterwarnings("ignore")  # ignore warning
 import argparse
@@ -97,9 +101,8 @@ def sample_images(args):
     }
 
     uni_model = timm.create_model(pretrained=False, **timm_kwargs).to(device).eval()
-    local_path = "/path/to/uni2/pytorch_model.bin"
     uni_model.load_state_dict(
-        torch.load(local_path, map_location="cpu"),
+        torch.load(args.uni_weights, map_location="cpu"),
         strict=True,
     )
 
@@ -111,9 +114,11 @@ def sample_images(args):
         ]
     )
 
-    image_list = np.load(
-        "/path/to/image_list.npy"
-    )
+    # image_list.npy: a numpy array of string paths to real reference images.
+    # Each reference is a 4096x4096 image, diced into 256x256 patches to build the
+    # UNI conditioning grid. A reference is required (4K generation cannot run
+    # without one).
+    image_list = np.load(args.image_list)
 
     idx_choice = np.random.randint(0, len(image_list), args.num_samples)
     # image_list = image_list[: args.num_samples]
@@ -268,6 +273,18 @@ if __name__ == "__main__":
         help="GPU ID to use for sampling",
     )
     parser.add_argument("--workdir", type=str, required=True)
+    parser.add_argument(
+        "--uni_weights",
+        type=str,
+        required=True,
+        help="Path to the UNI2-h weights (pytorch_model.bin) used to build the conditioning grid.",
+    )
+    parser.add_argument(
+        "--image_list",
+        type=str,
+        required=True,
+        help="Path to a .npy array of string paths to real 4096x4096 reference images.",
+    )
 
     args = parser.parse_args()
     sample_images(args)

@@ -97,18 +97,29 @@ print(f['tcga_diagnostic_1024'][:5])
 ### Feature Extraction
 
 For each patch, we pre-extract:
-- VAE features (sd3vae latents)  
-- SSL embeddings (UNI2)
+- VAE features (SD-3.5 VAE latents) — we use the VAE from [`stabilityai/stable-diffusion-3.5-large`](https://huggingface.co/stabilityai/stable-diffusion-3.5-large) (the `vae` subfolder). Download it to `pretrained_models/sd-3.5-vae`.
+- SSL embeddings ([UNI2-h](https://huggingface.co/MahmoodLab/UNI2-h)) — download the weights to `pretrained_models/uni2/pytorch_model.bin`.
 
-These are stored in the same directory as the images:
+Images live under `patches/` and the extracted features live under a parallel `features/` tree (mirroring the same relative paths):
 
-    patches/<dataset>/<folder>/<patch>.jpeg
-    patches/<dataset>/<folder>/<patch>_sd3_vae.npy
-    patches/<dataset>/<folder>/<patch>_uni.npy
+    <root>/
+    ├── patches/
+    │   ├── metadata/patch_names_all.hdf5
+    │   └── <dataset>/<folder>/<patch>.jpeg
+    └── features/
+        └── <dataset>/<folder>/
+            ├── <patch>_sd3_vae.npy
+            └── <patch>_uni.npy
 
 Extract features with:
 
-    python tools/extract_features.py --dataset_name tcga_diagnostic --size 256
+    python tools/extract_features.py --root /path/to/dataset --dataset_name tcga_diagnostic --size 256
+
+### Sample dataset
+
+To try sampling without preparing the full dataset, we release a small bundle of pre-extracted features (32 TCGA patches, in the layout above) on Hugging Face: [`StonyBrook-CVLab/PixCell-sample-data`](https://huggingface.co/datasets/StonyBrook-CVLab/PixCell-sample-data).
+
+Download it and point `data["root"]` in your inference `config.py` at the extracted folder.
 
 ## 🚀 Training
 
@@ -151,6 +162,18 @@ See the config files in `configs/pan_cancer/` for details.
 
 We provide sampling scripts for generating 256×256 (PixCell-256) and 1024×1024 (PixCell-1024) patches.
 
+**Setting up the `--workdir`.** The scripts read a `config.py` from `--workdir` to build the model. For the released checkpoints, copy the matching ready-to-use config into your workdir and edit the two paths inside it (`vae_pretrained`, `data["root"]`):
+
+    mkdir -p /path/to/workdir/checkpoints
+    # PixCell-256:
+    cp configs/pan_cancer/pixcell_256_inference.py  /path/to/workdir/config.py
+    # PixCell-1024:
+    cp configs/pan_cancer/pixcell_1024_inference.py /path/to/workdir/config.py
+
+Then place the downloaded checkpoint at the path you pass to `--checkpoint`. The released `pixcell_256.ckpt` / `pixcell_1024.ckpt` **are** the EMA weights (stored under the `state_dict` key); the scripts just default to `checkpoints/last_ema.ckpt`, so point `--checkpoint` at your downloaded file (e.g. `checkpoints/pixcell_256.ckpt`).
+
+The UNI conditioning embeddings come from a dataset of pre-extracted features. To try sampling without the full dataset, use the small [sample dataset](#-dataset-preparation) and set `data["root"]` in your `config.py` to it.
+
 Example for 256×256 generation:
 
     python tools/sample_256.py \
@@ -169,15 +192,20 @@ Outputs:
     ├── syn/    # generated synthetic patches
 
 
-Using our [CVPR24 Large image generation](https://histodiffusion.github.io/docs/projects/large_image/) algorithm, we can generate 4K×4K images:
+Using our [CVPR24 Large image generation](https://histodiffusion.github.io/docs/projects/large_image/) algorithm, we can generate 4K×4K images with PixCell-1024:
 
     python tools/sample_4k.py \
+        --workdir /path/to/workdir \
+        --uni_weights pretrained_models/uni2/pytorch_model.bin \
+        --image_list /path/to/image_list.npy \
         --output_dir samples_4k \
         --num_samples 100 \
         --num_timesteps 20 \
         --guidance_scale 2 \
         --sliding_window_size 64 \
         --gpu_id 0
+
+4K generation is **reference-based**: `image_list.npy` is a NumPy array of string paths to real 4096×4096 images, each of which is diced into 256×256 patches to build the UNI conditioning grid.
 
 ### Hugging Face Diffusers Sampling
 
@@ -250,13 +278,15 @@ The scripts we provide assume that the UNI embeddings are **not** pre-extracted.
 
 If you use PixCell in your research, please cite:
 
-    @article{yellapragada2025pixcell,
-    title={PixCell: A generative foundation model for digital histopathology images},
-    author={Yellapragada, Srikar and Graikos, Alexandros and Li, Zilinghan and Triaridis, Kostas and Belagali, Varun and Kapse, Saarthak and Nandi, Tarak Nath and Madduri, Ravi K and Prasanna, Prateek and Kurc, Tahsin and others},
-    journal={arXiv preprint arXiv:2506.05127},
-    year={2025}
+    @misc{yellapragada2025pixcell,
+        title={PixCell: A generative foundation model for digital histopathology images}, 
+        author={Srikar Yellapragada and Alexandros Graikos and Zilinghan Li and Kostas Triaridis and Varun Belagali and Tarak Nath Nandi and Karen Bai and Beatrice S. Knudsen and Tahsin Kurc and Rajarsi R. Gupta and Prateek Prasanna and Ravi K Madduri and Joel Saltz and Dimitris Samaras},
+        year={2025},
+        eprint={2506.05127},
+        archivePrefix={arXiv},
+        primaryClass={eess.IV},
+        url={https://arxiv.org/abs/2506.05127}, 
     }
-
 ---
 
 ## 🤗 Acknowledgements

@@ -1,8 +1,12 @@
 import os
 import sys
 from tqdm import tqdm
-sys.path.append("/home/srikarym/code/PixArt-sigma")
 from pathlib import Path
+
+# Make the repo root importable so `tools` resolves when this script is run
+# directly (e.g. `python tools/extract_features.py ...`).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import torch
 from torch.utils.data import Dataset, DataLoader, default_collate
 from diffusers.models import AutoencoderKL
